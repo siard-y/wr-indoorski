@@ -7,7 +7,7 @@ import time                        # Get sleep function to delay loop
 
 
 def get_last_record():
-    conn = sqlite3.connect(r"/home/pi/IndoorSki/indoorski.db")
+    conn = sqlite3.connect(r"indoorski.db")
     cursor = conn.execute("SELECT datum, meting_nr, counter, duration FROM pulse ORDER BY datum DESC LIMIT 1")
     row = cursor.fetchone()
     conn.close()
