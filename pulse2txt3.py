@@ -39,13 +39,6 @@ datum_previous = datetime.datetime.now()
 url_json = "https://www.digizon.nl/IndoorSki.aspx"
 
 
-def threaded_request(pulse_json):
-    global url_json
-    json_dump = json.dumps(pulse_json)
-    response = requests.post(url_json, json=json_dump, timeout=0.5)
-    # print(response.text)
-
-
 # def create_textfile(filename):
 #     f2 = open(last_meting_folder + filename, 'w')
 #     f2.close()
@@ -74,14 +67,7 @@ def pulse_detected(pin, force=False):
         ):
             nieuwe_meting = True
 
-        # Eerste puls, meting start 
-        if nieuwe_meting:
-            filename_data = '/home/pi/IndoorSki/pulse2txt/' + datum2string(datetime.datetime.now()) + '.txt'
-            print('######### NIEUWE METING ########### \nFile: ' + filename_data)
-            counter = 0
-            datum_previous = datetime.datetime.now()
-            meting_start = datetime.datetime.now()
-            nieuwe_meting = False
+        # Eerste puls, meting start
 
         # Previous pulse
         diff_in_milli_secs = (datetime.datetime.now() - datum_previous).total_seconds() * 1000
@@ -102,67 +88,24 @@ def pulse_detected(pin, force=False):
         if delta.total_seconds() > 0:
             gem_snelheid = meting_afstand / delta.total_seconds()
 
-        # insert pulse
-        pulse = (
-            datum2string(meting_start),
-            datum2string(datetime.datetime.now()),
-            datum2string(datum_previous),
-            str(counter),
-            str(counter_totaal),
-            str(round(diff_in_milli_secs, 2)),
-            str(round(snelheid, 2)),
-            str(round(meting_afstand, 2)),
-            str(round(meting_afstand_totaal, 2)),
-            str(round(gem_snelheid, 2))
-        )
 
-        # Write 1 line
-        f1 = open(filename_data, "a")  # append mode
-        f1.write('\t'.join(pulse) + '\n')
-        f1.close()
-
-        # Compose Json
-        pulse_json = {
-            "meting_start": pulse[0],
-            "datum": pulse[1],
-            "datum_previous": pulse[2],
-            "counter": pulse[3],
-            "counter_totaal": pulse[4],
-            "diff_in_milli_secs": pulse[5],
-            "snelheid": pulse[6],
-            "meting_afstand": pulse[7],
-            "meting_afstand_totaal": pulse[8],
-            "gem_snelheid": pulse[9]
-        }
-        print(json.dumps(pulse_json, indent=4))
 
         # Display
         counter += 1
         counter_totaal += 1
 
-        # Send request
-        if send_lastmeting_httprequest:
-            thread2 = Thread(target=threaded_request, args=(pulse_json,))
-            thread2.start()
+        print(f"{datetime.datetime.now()}, {counter_totaal}")
 
-
-# Wake up http receiver
-if send_lastmeting_httprequest:
-    try:
-        print("Wake up http receiver...")
-        response = requests.get(url_json, json={}, timeout=10)
-        print('status_code: ', response.status_code)
-    except:
-        print('error waking up:')
 
 # On input change, run input_Chng function
-GPIO.add_event_detect(7, GPIO.RISING, callback=pulse_detected, bouncetime=50)
+GPIO.add_event_detect(7, GPIO.RISING, callback=pulse_detected, bouncetime=150)
 
 # Ready for meting!
 print('Ready!')
 
 # seed random number generator
 seed(1)
+
 
 try:
     while True:
@@ -172,3 +115,5 @@ try:
 
 except KeyboardInterrupt:  # trap a CTRL+C keyboard interrupt
     GPIO.cleanup()  # resets all GPIO ports used by this program
+    with open("counter.txt", "w") as cntfile:
+        cntfile.write(str(f"{counter_totaal}, {counter}, {datum_previous}"))

@@ -1,12 +1,7 @@
 #!/usr/bin/python
-
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 from threading import Thread
 from time import sleep
 import RPi.GPIO as GPIO  # import RPi.GPIO module
-import decimal
-import glob
 import json
 import os, datetime, atexit, time, sys
 import requests
@@ -25,7 +20,6 @@ GPIO.setup(7, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # set pin 7 as input
 last_meting_folder = '/home/pi/IndoorSki/pulse2txt/lastmeting/'
 
 omtrek_rol_m = 1.274
-send_lastmeting_httprequest = True
 
 # Vars
 counter = 0
@@ -34,6 +28,7 @@ filename_data = ''
 meting_start = datetime.datetime.now()
 nieuwe_meting = True
 datum_previous = datetime.datetime.now()
+counterfile = open("counter.txt", "w")
 
 # url_json = "http://deskthijs.local/Digizon/Website/IndoorSki.aspx"
 url_json = "https://www.digizon.nl/IndoorSki.aspx"
@@ -74,7 +69,7 @@ def pulse_detected(pin, force=False):
         ):
             nieuwe_meting = True
 
-        # Eerste puls, meting start 
+        # Eerste puls, meting start
         if nieuwe_meting:
             filename_data = '/home/pi/IndoorSki/pulse2txt/' + datum2string(datetime.datetime.now()) + '.txt'
             print('######### NIEUWE METING ########### \nFile: ' + filename_data)
@@ -116,11 +111,6 @@ def pulse_detected(pin, force=False):
             str(round(gem_snelheid, 2))
         )
 
-        # Write 1 line
-        f1 = open(filename_data, "a")  # append mode
-        f1.write('\t'.join(pulse) + '\n')
-        f1.close()
-
         # Compose Json
         pulse_json = {
             "meting_start": pulse[0],
@@ -134,26 +124,13 @@ def pulse_detected(pin, force=False):
             "meting_afstand_totaal": pulse[8],
             "gem_snelheid": pulse[9]
         }
-        print(json.dumps(pulse_json, indent=4))
 
         # Display
         counter += 1
         counter_totaal += 1
-
-        # Send request
-        if send_lastmeting_httprequest:
-            thread2 = Thread(target=threaded_request, args=(pulse_json,))
-            thread2.start()
-
-
-# Wake up http receiver
-if send_lastmeting_httprequest:
-    try:
-        print("Wake up http receiver...")
-        response = requests.get(url_json, json={}, timeout=10)
-        print('status_code: ', response.status_code)
-    except:
-        print('error waking up:')
+        counterfile.write(f"{datetime.datetime.now()}, {counter_totaal}\n")
+        if counter % 100 == 0:
+            counterfile.flush()
 
 # On input change, run input_Chng function
 GPIO.add_event_detect(7, GPIO.RISING, callback=pulse_detected, bouncetime=50)
@@ -172,3 +149,4 @@ try:
 
 except KeyboardInterrupt:  # trap a CTRL+C keyboard interrupt
     GPIO.cleanup()  # resets all GPIO ports used by this program
+    counterfile.close()

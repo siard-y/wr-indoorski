@@ -39,13 +39,6 @@ datum_previous = datetime.datetime.now()
 url_json = "https://www.digizon.nl/IndoorSki.aspx"
 
 
-def threaded_request(pulse_json):
-    global url_json
-    json_dump = json.dumps(pulse_json)
-    response = requests.post(url_json, json=json_dump, timeout=0.5)
-    # print(response.text)
-
-
 # def create_textfile(filename):
 #     f2 = open(last_meting_folder + filename, 'w')
 #     f2.close()
@@ -140,29 +133,16 @@ def pulse_detected(pin, force=False):
         counter += 1
         counter_totaal += 1
 
-        # Send request
-        if send_lastmeting_httprequest:
-            thread2 = Thread(target=threaded_request, args=(pulse_json,))
-            thread2.start()
-
-
-# Wake up http receiver
-if send_lastmeting_httprequest:
-    try:
-        print("Wake up http receiver...")
-        response = requests.get(url_json, json={}, timeout=10)
-        print('status_code: ', response.status_code)
-    except:
-        print('error waking up:')
 
 # On input change, run input_Chng function
-GPIO.add_event_detect(7, GPIO.RISING, callback=pulse_detected, bouncetime=50)
+GPIO.add_event_detect(7, GPIO.RISING, callback=pulse_detected, bouncetime=100)
 
 # Ready for meting!
 print('Ready!')
 
 # seed random number generator
 seed(1)
+
 
 try:
     while True:
@@ -172,3 +152,5 @@ try:
 
 except KeyboardInterrupt:  # trap a CTRL+C keyboard interrupt
     GPIO.cleanup()  # resets all GPIO ports used by this program
+    with open("counter.txt", "w") as cntfile:
+        cntfile.write(str(f"{counter_totaal}, {counter}, {datum_previous}"))
