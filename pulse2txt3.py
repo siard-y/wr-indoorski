@@ -115,5 +115,5 @@ try:
 
 except KeyboardInterrupt:  # trap a CTRL+C keyboard interrupt
     GPIO.cleanup()  # resets all GPIO ports used by this program
-    with open("counter.txt", "w") as cntfile:
+    with open("counterdata_testrun1_24h.txt", "w") as cntfile:
         cntfile.write(str(f"{counter_totaal}, {counter}, {datum_previous}"))
