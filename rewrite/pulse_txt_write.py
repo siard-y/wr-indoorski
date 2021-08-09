@@ -51,8 +51,8 @@ def pulse_detected(channel):
 
 GPIO.add_event_detect(7, GPIO.RISING, callback=pulse_detected, bouncetime=10)
 
-while True:
-    try:
+try:
+    while True:
         pass
-    except KeyboardInterrupt:
-        GPIO.cleanup()
+except KeyboardInterrupt:
+    GPIO.cleanup()
