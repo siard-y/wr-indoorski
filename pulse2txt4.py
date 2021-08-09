@@ -85,7 +85,7 @@ def pulse_detected(pin, force=False):
         log_list.append(f"{delta}, {datetime.datetime.now()}, {diff_in_milli_secs:0.2f}, {counter_totaal}\n")
 
         if len(log_list) == 40:
-            with open("counterdata_testrun1_24h.txt", "a") as counterfile:
+            with open("counterdata.txt", "a") as counterfile:
                 for line in log_list:
                     counterfile.write(f"{line}")
             log_list.clear()
