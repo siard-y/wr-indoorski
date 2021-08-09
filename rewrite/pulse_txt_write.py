@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-import sqlite3
 import RPi.GPIO as GPIO
 from datetime import datetime
 
