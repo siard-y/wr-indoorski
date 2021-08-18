@@ -78,7 +78,7 @@ def pulse_detected(channel):
 if http_receiver:
     try:
         print("Wake up http receiver...")
-        response = requests.post("http://192.168.1.203:1880/test", timeout=10)
+        response = requests.post("http://192.168.1.203:1880/vdata", timeout=10)
         print('status_code: ', response.status_code)
     except:
         print('error waking up:')
