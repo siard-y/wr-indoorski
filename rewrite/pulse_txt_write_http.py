@@ -16,6 +16,8 @@ http_receiver = True
 
 
 class Data:
+    omtrek_rol_m = 1.274
+
     counter = 0
     meting_start_time = datetime.now()
     datetime_previouspulse = datetime.now()
@@ -51,9 +53,12 @@ def pulse_detected(channel):
         data_string = f"{time_since_start}, {pulse_time_now}, {time_since_last_pulse_ms:0.2f}, {data.get_counter()}\n"
 
         json_data_dict = {
-            "pulse_duration": str(round(time_since_last_pulse_ms, 2)),
             "counter": str(data.get_counter()),
-            "speed": str(round(((1.274 * 1000) / time_since_last_pulse_ms) * 3.6, 2))
+            "pulse_duration": str(round(time_since_last_pulse_ms, 2)),
+            "speed": str(round(((data.omtrek_rol_m * 1000) / time_since_last_pulse_ms) * 3.6, 2)),
+            "average_speed": str(round(((data.omtrek_rol_m * data.get_counter()) / time_since_start.total_seconds()) * 3.6, 2)),
+            "distance": str(round((data.omtrek_rol_m * data.get_counter()) / 1000, 2)),
+            "time_since_start": str(time_since_start).split(".")[0]
         }
 
         if http_receiver:
