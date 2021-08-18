@@ -38,7 +38,7 @@ data = Data()
 
 def threaded_request(pulse_json):
     json_dump = dumps(pulse_json)
-    response = requests.post("http://192.168.1.203:1880/test", data=json_dump, timeout=0.5)
+    response = requests.post("http://192.168.1.203:1880/vdata", data=json_dump, timeout=0.5)
 
 
 def pulse_detected(channel):
