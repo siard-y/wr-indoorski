@@ -91,6 +91,7 @@ if http_receiver:
     except:
         print('error waking up:')
 
+
 GPIO.add_event_detect(7, GPIO.RISING, callback=pulse_detected, bouncetime=10)
 
 try:
