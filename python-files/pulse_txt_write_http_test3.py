@@ -22,6 +22,7 @@ class Data:
     meting_start_time = datetime.now()
     datetime_previouspulse = datetime.now()
     log_list = []
+    speed_list = []
 
     def increment_counter(self):
         self.counter += 1
@@ -60,15 +61,19 @@ def pulse_detected(channel):
         json_data_dict = {
             "counter": str(data.get_counter()),
             "pulse_duration": str('{:.2f}'.format(round(time_since_last_pulse_ms, 2))),
-            "speed": str('{:.2f}'.format(round(speed_kmh, 2))),
+            "speed": "",
             "average_speed": str('{:.2f}'.format(round(average_speed_kmh, 2))),
             "distance": str('{:.2f}'.format(round(distance_km, 2))),
             "time_since_start": str(time_since_start).split(".")[0]
         }
 
-        if http_receiver:
+        data.speed_list.append(speed_kmh)
+
+        if http_receiver and data.get_counter() % 10 == 0:
+            json_data_dict["speed"] = round(sum(data.speed_list) / len(data.speed_list), 2)
             thread2 = Thread(target=threaded_request, args=(json_data_dict,))
             thread2.start()
+            data.speed_list.clear()
 
         data.log_list.append(data_string)
         print(data_string.replace("\n", ""))
