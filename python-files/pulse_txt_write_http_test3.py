@@ -39,7 +39,7 @@ data = Data()
 
 def threaded_request(pulse_json):
     json_dump = dumps(pulse_json)
-    response = requests.post("http://192.168.1.203:1880/vdata", data=json_dump, timeout=0.5)
+    response = requests.post("http://192.168.1.228:1880/vdata", data=json_dump, timeout=0.5)
 
 
 def pulse_detected(channel):
@@ -69,7 +69,7 @@ def pulse_detected(channel):
 
         data.speed_list.append(speed_kmh)
 
-        if http_receiver and data.get_counter() % 10 == 0:
+        if http_receiver and data.get_counter() % 3 == 0:
             json_data_dict["speed"] = round(sum(data.speed_list) / len(data.speed_list), 2)
             thread2 = Thread(target=threaded_request, args=(json_data_dict,))
             thread2.start()
@@ -88,7 +88,7 @@ def pulse_detected(channel):
 if http_receiver:
     try:
         print("Wake up http receiver...")
-        response = requests.post("http://192.168.1.203:1880/vdata", timeout=10)
+        response = requests.post("http://192.168.1.228:1880/vdata", timeout=10)
         print('status_code: ', response.status_code)
     except:
         print('error waking up:')
